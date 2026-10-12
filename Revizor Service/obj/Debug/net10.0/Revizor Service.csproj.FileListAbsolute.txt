@@ -1,0 +1,52 @@
+/home/balabol/Рабочий стол/revizor/Revizor Service/obj/Debug/net10.0/Revizor Service.csproj.AssemblyReference.cache
+/home/balabol/Рабочий стол/revizor/Revizor Service/obj/Debug/net10.0/rpswa.dswa.cache.json
+/home/balabol/Рабочий стол/revizor/Revizor Service/obj/Debug/net10.0/Revizor Service.GeneratedMSBuildEditorConfig.editorconfig
+/home/balabol/Рабочий стол/revizor/Revizor Service/obj/Debug/net10.0/Revizor Service.AssemblyInfoInputs.cache
+/home/balabol/Рабочий стол/revizor/Revizor Service/obj/Debug/net10.0/Revizor Service.AssemblyInfo.cs
+/home/balabol/Рабочий стол/revizor/Revizor Service/obj/Debug/net10.0/Revizor Service.csproj.CoreCompileInputs.cache
+/home/balabol/Рабочий стол/revizor/Revizor Service/obj/Debug/net10.0/Revizor Service.MvcApplicationPartsAssemblyInfo.cs
+/home/balabol/Рабочий стол/revizor/Revizor Service/obj/Debug/net10.0/Revizor Service.MvcApplicationPartsAssemblyInfo.cache
+/home/balabol/Рабочий стол/revizor/Revizor Service/obj/Debug/net10.0/Revizor Service.sourcelink.json
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/appsettings.Development.json
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/appsettings.json
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Revizor Service.staticwebassets.endpoints.json
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Revizor Service
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Revizor Service.deps.json
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Revizor Service.runtimeconfig.json
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Revizor Service.dll
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Revizor Service.pdb
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Dapper.dll
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Microsoft.AspNetCore.OpenApi.dll
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Microsoft.Bcl.Cryptography.dll
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Microsoft.EntityFrameworkCore.dll
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Microsoft.EntityFrameworkCore.Abstractions.dll
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Microsoft.EntityFrameworkCore.Relational.dll
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Microsoft.IdentityModel.Abstractions.dll
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Microsoft.IdentityModel.JsonWebTokens.dll
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Microsoft.IdentityModel.Logging.dll
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Microsoft.IdentityModel.Protocols.dll
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Microsoft.IdentityModel.Tokens.dll
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Microsoft.OpenApi.dll
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Npgsql.dll
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Swashbuckle.AspNetCore.Swagger.dll
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Swashbuckle.AspNetCore.SwaggerGen.dll
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/Swashbuckle.AspNetCore.SwaggerUI.dll
+/home/balabol/Рабочий стол/revizor/Revizor Service/bin/Debug/net10.0/System.IdentityModel.Tokens.Jwt.dll
+/home/balabol/Рабочий стол/revizor/Revizor Service/obj/Debug/net10.0/rjimswa.dswa.cache.json
+/home/balabol/Рабочий стол/revizor/Revizor Service/obj/Debug/net10.0/rjsmrazor.dswa.cache.json
+/home/balabol/Рабочий стол/revizor/Revizor Service/obj/Debug/net10.0/rjsmcshtml.dswa.cache.json
+/home/balabol/Рабочий стол/revizor/Revizor Service/obj/Debug/net10.0/scopedcss/bundle/Revizor Service.styles.css
+/home/balabol/Рабочий стол/revizor/Revizor Service/obj/Debug/net10.0/staticwebassets.build.json
+/home/balabol/Рабочий стол/revizor/Revizor Service/obj/Debug/net10.0/staticwebassets.build.json.cache
+/home/balabol/Рабочий стол/revizor/Revizor Service/obj/Debug/net10.0/staticwebassets.development.json
+/home/balabol/Рабочий стол/revizor/Revizor Service/obj/Debug/net10.0/staticwebassets.build.endpoints.json
+/home/balabol/Рабочий стол/revizor/Revizor Service/obj/Debug/net10.0/swae.build.ex.cache
+/home/balabol/Рабочий стол/revizor/Revizor Service/obj/Debug/net10.0/Revizor .3D39AE02.Up2Date
+/home/balabol/Рабочий стол/revizor/Revizor Service/obj/Debug/net10.0/Revizor Service.dll
+/home/balabol/Рабочий стол/revizor/Revizor Service/obj/Debug/net10.0/refint/Revizor Service.dll
+/home/balabol/Рабочий стол/revizor/Revizor Service/obj/Debug/net10.0/Revizor Service.pdb
+/home/balabol/Рабочий стол/revizor/Revizor Service/obj/Debug/net10.0/Revizor Service.genruntimeconfig.cache
+/home/balabol/Рабочий стол/revizor/Revizor Service/obj/Debug/net10.0/ref/Revizor Service.dll

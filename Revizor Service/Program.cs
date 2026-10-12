@@ -63,5 +63,5 @@ app.MapGet("/roles/{id}", async (DBRepo db, Guid id) =>
 app.MapPatch("/roles/{id}",async (DBRepo db, Guid id, PatchRole dto ) =>
 {
     
-})
+});
 app.Run();

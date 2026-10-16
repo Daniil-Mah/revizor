@@ -6,6 +6,6 @@ namespace Revizor_Service.DTO;
 public class CreateUser
 {
     public string Name { get; set; }
-    public Role Role {get;set;} 
+    public int RoleId {get;set;} 
     public string Password {get;set;} 
 }

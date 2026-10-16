@@ -26,6 +26,10 @@ public class Pagination
     public int Limit { get; set; }
     public int Offset { get; set; }
     public Pagination(){}
+    public Pagination(int limit, int offset)
+    {
+        Limit = limit; Offset = offset;
+    }
     public Pagination(int limit, int offset, int total)
     {
         Limit = limit; Offset = offset; Total = total;

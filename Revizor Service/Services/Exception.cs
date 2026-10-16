@@ -16,5 +16,4 @@ public enum ExceptionCode
     Unauthorized,
     Forbidden,
     InternalError
-
 }

@@ -6,4 +6,3 @@ public class PatchRole
 {
     public string? Name { get; set; } = null;
 }
-

@@ -14,7 +14,7 @@ public class JWT
         {
             new Claim(ClaimTypes.NameIdentifier, us.Id.ToString()),
             new Claim(ClaimTypes.Name, us.Name),
-            new Claim(ClaimTypes.Role, us.Role.Name)
+            new Claim(ClaimTypes.Role, us.Role!.Name)
         };
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(cfg["JWT:Key"]!));
         var creds = new SigningCredentials(key,SecurityAlgorithms.HmacSha256);

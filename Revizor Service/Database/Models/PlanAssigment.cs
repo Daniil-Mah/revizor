@@ -6,9 +6,14 @@ public class PlanAssigment
 {
     public Guid Id {get;set;}
     public Guid PlanId {get;set;}
+    public Plan Plan {get;set;}
     public Guid FacilityId {get;set;}
+    public Facility Facility {get;set;}
     public DateTime PassAt {get;set;}
-    public Guid PassBy {get;set;}
+    public Guid PassById {get;set;}
+    public User PassBy {get;set;}
     public Guid ResponsiblePersonId {get;set;}
+    public User ResponsiblePerson {get;set;}
+
 }
 

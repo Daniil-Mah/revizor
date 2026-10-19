@@ -4,7 +4,6 @@ namespace Revizor_Service.DTO;
 
 public class CreateAssigment
 {
-    public Guid PlanId {get;set;}
     public Guid FacilityId {get;set;}
     public DateTime PassAt {get;set;}
     public Guid PassById {get;set;}

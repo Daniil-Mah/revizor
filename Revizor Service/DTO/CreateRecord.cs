@@ -4,7 +4,6 @@ namespace Revizor_Service.DTO;
 
 public class CreateRecord
 {
-    public Guid UserId {get;set;}
     public Guid FacilityId {get;set;}
     public TimeOnly StartAt {get;set;}
     public TimeOnly EndAt {get;set;}

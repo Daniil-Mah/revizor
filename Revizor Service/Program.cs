@@ -373,6 +373,9 @@ app.MapPost("/plan-assigment/{planId}", async (AppDbContext db,ClaimsPrincipal c
 
     var plan = await db.Plans.FirstOrDefaultAsync(p=> p.Id == planId);
     if (plan == null) return Results.NotFound(ApiResponses.Fail("plan not found", ExceptionCode.NotFound));
+
+    if (dtos.Count == 0) return Results.Ok(ApiResponses.Ok("you send empty body"));
+
     foreach (var assigment in dtos)
     {
         await db.PlanAssigments.AddAsync(new PlanAssigment{
@@ -392,14 +395,16 @@ app.MapPost("/record/", async (AppDbContext db, ClaimsPrincipal claims,CreateRec
 {
     var success = Guid.TryParse(claims.FindFirstValue(ClaimTypes.NameIdentifier), out Guid userId);
     if (!success) {return Results.NotFound(ApiResponses.Fail("user not found", ExceptionCode.NotFound));}
-    var plan = await db.Plans.FirstOrDefaultAsync(p => p.IsArchived==false);
-    if (plan == null) return Results.NotFound(ApiResponses.Fail("plan not found", ExceptionCode.NotFound));
+    
+    var currentPlan = await db.Plans.FirstOrDefaultAsync(p => p.IsArchived==false);
+    if (currentPlan == null) return Results.NotFound(ApiResponses.Fail("plan not found", ExceptionCode.NotFound));
+
+    var assigment = await db.PlanAssigments.Where(p=> p.PlanId == currentPlan.Id && p.PassById == userId).FirstOrDefaultAsync();
+    if (assigment == null) return Results.NotFound(ApiResponses.Fail("assigment not found",ExceptionCode.NotFound));
+
+
     await db.Records.AddAsync(new Record {
-        PlanId= plan.Id,
-        CreatedAt=DateTime.UtcNow,
-        FacilityId=dto.FacilityId, 
-        UserId=userId, 
-        StartAt=dto.StartAt,
+        PlanAssigmentId=assigment.Id,
         EndAt=dto.EndAt,
         PassageWay=dto.PassageWay});
     await db.SaveChangesAsync();
@@ -416,10 +421,6 @@ app.MapPatch("/record/{recordId}", async (AppDbContext db, ClaimsPrincipal claim
     var record = await db.Records.FirstOrDefaultAsync(r=> r.Id == recordId);
     if (record == null) return Results.NotFound(ApiResponses.Fail("record not found",ExceptionCode.NotFound));
 
-    if (dto.PlanId != null) record.PlanId = (Guid)dto.PlanId;
-    if (dto.FacilityId != null) record.FacilityId = (Guid)dto.FacilityId;
-    if (dto.UserId != null) record.UserId = (Guid)dto.UserId;
-    if (dto.StartAt != null) record.StartAt = (TimeOnly)dto.StartAt;
     if (dto.EndAt != null) record.EndAt = (TimeOnly)dto.EndAt;
     if (dto.PassageWay != null) record.PassageWay = (float)dto.PassageWay;
 

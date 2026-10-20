@@ -11,7 +11,6 @@ using Revizor_Service.DTO;
 using Revizor_Service.Responses;
 using Revizor_Service.Services;
 using Microsoft.EntityFrameworkCore;
-using DocumentFormat.OpenXml.Office2016.Excel;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();

@@ -10,6 +10,9 @@ public class RefreshToken
         var randomNumber = new byte[32];
         using var rnd = RandomNumberGenerator.Create();
         rnd.GetBytes(randomNumber);
-        return Convert.ToBase64String(randomNumber);
+        return Convert.ToBase64String(randomNumber)
+            .Replace('+', '-')
+            .Replace('/', '_')
+            .Replace("=", "");;
     }
 }

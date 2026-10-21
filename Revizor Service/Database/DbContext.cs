@@ -64,7 +64,6 @@ public class AppDbContext (DbContextOptions<AppDbContext> options) : DbContext(o
         {
             e.HasKey(r => r.Id);
             e.Property(r => r.Id).HasDefaultValueSql("gen_random_uuid()");
-            e.Property(r => r.CreatedAt).HasDefaultValueSql("now()");
         });
 
         mb.Entity<PlanAssigment>(e =>

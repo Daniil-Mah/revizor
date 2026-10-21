@@ -1,3 +1,4 @@
+using System;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -53,6 +54,16 @@ builder.Services.AddAuthorization(opt =>
 builder.Services.AddScoped<IPasswordHasher<CreateUser>, PasswordHasher<CreateUser>>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<ReportsServices>();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 var app = builder.Build();
 app.UseExceptionHandler(errorApp =>
 {
@@ -66,6 +77,7 @@ app.UseExceptionHandler(errorApp =>
         await context.Response.WriteAsJsonAsync(ApiResponses.Fail(message, code));
     });
 });
+app.UseCors("AllowFrontend");
 app.UseSwagger();
 app.UseSwaggerUI();
 app.MapOpenApi();
@@ -73,7 +85,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/roles", async (AppDbContext db) => Results.Ok(ApiResponses<IEnumerable<Role>>.Ok(await db.Roles.ToArrayAsync(), new Pagination{}))).RequireAuthorization("Admin").WithTags("Role");
+app.MapGet("/roles", async (AppDbContext db) => Results.Ok(ApiResponses<IEnumerable<Role>>.Ok(await db.Roles.ToArrayAsync(), new Pagination{}))).WithTags("Role");
 
 app.MapPost("/roles/", async (AppDbContext db, CreateRole dto) =>
 {

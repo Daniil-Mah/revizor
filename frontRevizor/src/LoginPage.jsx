@@ -44,7 +44,6 @@ function LoginPage() {
       <div className="login-card">
         <h1 className="login-title">Добро пожаловать</h1>
         <p className="login-subtitle">Введите свои данные, чтобы продолжить</p>
-        
         <form onSubmit={handleSubmit} className="login-form">
           <div className="input-group">
             <input 
@@ -55,7 +54,6 @@ function LoginPage() {
               required
             />
           </div>
-          
           <div className="input-group">
             <input 
               type="password" 
@@ -65,9 +63,7 @@ function LoginPage() {
               required
             />
           </div>
-
           {error && <div className="login-error">{error}</div>}
-          
           <button type="submit" className="login-button">Войти</button>
         </form>
       </div>

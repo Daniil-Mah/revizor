@@ -1,15 +1,20 @@
 import { Routes, Route } from 'react-router-dom';
 import LoginPage from './LoginPage';
 import AdminPage from './AdminPage/AdminPage';
-import RolePage from './AdminPage/RolePage';
-
+import ProtectedRoute from './ProtectedRoute';
 
 function App() {
   return (
     <Routes>
-        <Route path="/roles" element={<RolePage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/admin" element={<AdminPage />} />
+        <Route 
+          path="/admin" 
+          element={
+          <ProtectedRoute>
+            <AdminPage />
+          </ProtectedRoute>
+          }
+        />
     </Routes>
   );
 }

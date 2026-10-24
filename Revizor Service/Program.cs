@@ -12,6 +12,8 @@ using Revizor_Service.DTO;
 using Revizor_Service.Responses;
 using Revizor_Service.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using DocumentFormat.OpenXml.Office2010.ExcelAc;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
@@ -133,7 +135,7 @@ app.MapGet("/users", async (AppDbContext db) => Results.Ok(ApiResponses<IEnumera
 app.MapPost("/users/", async (IPasswordHasher<CreateUser> hasher,AppDbContext db, CreateUser dto) =>
 {
     dto.Password = hasher.HashPassword(dto, dto.Password);
-    await db.Users.AddAsync(new User {Name = dto.Name, Password = dto.Password, RoleId = dto.RoleId });
+    await db.Users.AddAsync(new User {FirstName = dto.FirstName,SecondName=dto.SecondName,LastName=dto.LastName, Password = dto.Password, RoleId = dto.RoleId });
     await db.SaveChangesAsync();
     return Results.Ok(ApiResponses.Ok("User is created"));
 })
@@ -164,7 +166,9 @@ app.MapPatch("/users/{userId}",async (AppDbContext db, Guid userId, PatchUser dt
     var user = await db.Users.FirstOrDefaultAsync(u=> u.Id == userId);
     if (user == null) { return Results.NotFound(ApiResponses.Fail("User does not exists", ExceptionCode.DoesNotExists));}
 
-    if (dto.Name != null) user.Name=dto.Name;
+    if (dto.FirstName != null) user.FirstName=dto.FirstName;
+    if (dto.SecondName != null) user.SecondName=dto.SecondName;
+    if (dto.LastName != null) user.LastName=dto.LastName;
     if (dto.RoleId != null) user.RoleId = (int)dto.RoleId;
 
     await db.SaveChangesAsync();
@@ -175,7 +179,9 @@ app.MapPatch("/users/{userId}",async (AppDbContext db, Guid userId, PatchUser dt
 
 app.MapPost("/login", async (AppDbContext db, IPasswordHasher<User> hasher, IConfiguration cfg, HttpContext httpContext, Login dto) =>
 {
-    var user = await db.Users.Include(u => u.Role).FirstOrDefaultAsync(u=> u.Name == dto.Name);
+    var user = await db.Users.Include(u => u.Role).FirstOrDefaultAsync(u=> u.FirstName == dto.FirstName
+                                                                        && u.SecondName==dto.SecondName 
+                                                                        && u.LastName==dto.LastName);
     if (user==null)
     {
         return Results.Unauthorized();
@@ -188,6 +194,7 @@ app.MapPost("/login", async (AppDbContext db, IPasswordHasher<User> hasher, ICon
     user.RefreshExpireTime = DateTime.UtcNow.AddDays(7);
 
     await db.SaveChangesAsync();
+    
     httpContext.Response.Cookies.Append("refreshToken", user.RefreshToken,new CookieOptions
     {
         HttpOnly=true,
@@ -195,6 +202,7 @@ app.MapPost("/login", async (AppDbContext db, IPasswordHasher<User> hasher, ICon
         SameSite=SameSiteMode.Strict,
         Expires=DateTime.UtcNow.AddDays(7)
     });
+
 
     return Results.Ok(
         ApiResponses<Token>.Ok(
@@ -234,13 +242,36 @@ app.MapPost("/refresh", async (AppDbContext db, HttpContext httpContext, IConfig
 })
 .WithTags("service");
 
-app.MapGet("/users/me", async (AppDbContext db, ClaimsPrincipal claims) =>
+app.MapGet("/users/me", async (AppDbContext db, HttpContext httpContext, ClaimsPrincipal claims) =>
 {
     var success = Guid.TryParse(claims.FindFirstValue(ClaimTypes.NameIdentifier), out Guid userId);
     if (!success) return Results.Unauthorized();
     var user = await db.Users.Include(u => u.Role).FirstOrDefaultAsync(u=> u.Id == userId);
     if (user == null) return Results.Unauthorized();
-    return Results.Ok(ApiResponses<User>.Ok(user));
+
+    var userInfo = new
+    {
+        Id = user.Id,
+        FirstName = user.FirstName,
+        SecondName = user.SecondName,
+        LastName = user.LastName,
+        Role = user.Role!.Name,
+        CreatedAt = user.CreatedAt
+    };
+
+    var json = JsonSerializer.Serialize(userInfo);
+    var base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
+
+    httpContext.Response.Cookies.Append("userInfo", base64, new CookieOptions
+    {
+        HttpOnly = false,
+        Secure = true,
+        SameSite = SameSiteMode.Strict,
+        Expires = DateTime.UtcNow.AddDays(7),
+        Path="/"
+    });
+
+    return Results.NoContent();
 })
 .RequireAuthorization(policy => policy.RequireRole("admin","revizor"))
 .WithTags("service");
@@ -267,6 +298,7 @@ app.MapGet("/facilities", async (AppDbContext db) => Results.Ok(ApiResponses<IEn
 app.MapPost("/facilities/", async (AppDbContext db, CreateFacility dto) =>
 {
     await db.Facilities.AddAsync(new Facility{Title = dto.Title, Location = dto.Location});
+    await db.SaveChangesAsync();
     return Results.Ok(ApiResponses.Ok("Facility is created"));
 })
 .RequireAuthorization("admin")
@@ -321,9 +353,16 @@ app.MapPost("/plan/", async (AppDbContext db, ClaimsPrincipal claims, CreatePlan
 {
     var success = Guid.TryParse(claims.FindFirstValue(ClaimTypes.NameIdentifier), out Guid userId);
     if (!success) return  Results.Unauthorized();
-    await db.Plans.AddAsync(new Plan{Name=dto.Name, PeriodStart=dto.PeriodStart, PeriodEnd=dto.PeriodEnd, CreatedById=userId});
-    await db.SaveChangesAsync();
-    return Results.Created("/plan/",ApiResponses.Ok("Plan is created"));
+    try
+    {
+        await db.Plans.AddAsync(new Plan{Name=dto.Name, PeriodStart=dto.PeriodStart, PeriodEnd=dto.PeriodEnd, CreatedById=userId});
+        await db.SaveChangesAsync();
+        return Results.Created("/plan/",ApiResponses.Ok("Plan is created"));    
+    }
+    catch(Exception)
+    {
+        return Results.Conflict(ApiResponses.Fail("invalid format date", ExceptionCode.ValidationError));
+    }
 })
 .RequireAuthorization("admin")
 .WithTags("Plan");
@@ -339,8 +378,9 @@ app.MapPatch("/plan/{planId}",async (AppDbContext db, Guid planId,ClaimsPrincipa
     if (dto.Name != null) plan.Name = dto.Name;
     if (dto.CreatedAt != null) plan.CreatedAt = (DateTime)dto.CreatedAt;
     if (dto.CreatedBy != null) plan.CreatedById = (Guid)dto.CreatedBy;
-    if (dto.PeriodStart != null) plan.PeriodStart = (DateTime)dto.PeriodStart;
-    if (dto.PeriodEnd != null) plan.PeriodEnd = (DateTime) dto.PeriodEnd;
+    if (dto.PeriodStart != null) plan.PeriodStart = (DateOnly)dto.PeriodStart;
+    if (dto.PeriodEnd != null) plan.PeriodEnd = dto.PeriodEnd;
+
     await db.SaveChangesAsync();
     return Results.NoContent();
 })
@@ -352,6 +392,7 @@ app.MapDelete("/plan/{planId}", async (AppDbContext db, Guid planId) =>
     var plan = await db.Plans.FirstOrDefaultAsync(p=> p.Id == planId);
     if (plan == null) return Results.NotFound(ApiResponses.Fail("plan not found", ExceptionCode.NotFound));
     db.Plans.Remove(plan);
+    await db.SaveChangesAsync();
     return Results.NoContent();     
 })
 .RequireAuthorization("admin")
@@ -361,8 +402,30 @@ app.MapGet("/plan/current", async (AppDbContext db) =>
 {
     var currentPlan = await db.Plans.FirstOrDefaultAsync(p=>p.IsArchived==false);
     if (currentPlan == null) return Results.NotFound(ApiResponses.Fail("current plan not found",ExceptionCode.NotFound));
-    var result = await db.PlanAssigments.Where(r=> r.PlanId == currentPlan.Id).ToListAsync();;
-    return Results.Ok(ApiResponses<IEnumerable<PlanAssigment>>.Ok(result));
+    var assigments = await db.PlanAssigments
+        .Where(r=> r.PlanId == currentPlan.Id)
+        .Include(r=> r.Facility)
+        .Include(r=> r.PassBy)
+        .Include(r=> r.ResponsiblePerson)
+        .ToListAsync();
+    var results = assigments.GroupBy(a=> a.Facility).Select(g=> new ResultAssigment
+    {
+        Id = g.Select(p=> p.Id).First(),
+        FacilityId = g.Key.Id,
+        FacilityTitle = g.Key.Title,
+        FacilityLocation = g.Key.Location,
+        PassAt = g.Select(u=> u.PassAt).FirstOrDefault(),
+        Revizors = g.Select(u=> new Revizor {
+            Id = u.PassById,
+            FullName = u.PassBy.GetFullName(),
+            }).ToList(),
+        ResponsiblePerson = g.Select(r => new ResponsiblePerson
+        {
+            Id = r.ResponsiblePersonId,
+            FullName = r.ResponsiblePerson.GetFullName()
+        }).FirstOrDefault(),
+    }).ToList();
+    return Results.Ok(ApiResponses<DataResultAssigments>.Ok(new () {NamePlan = currentPlan.Name, Assigments=results}));
 })
 .RequireAuthorization(policy => policy.RequireRole("admin","revizor"))
 .WithTags("Plan");
@@ -413,7 +476,6 @@ app.MapPost("/record/", async (AppDbContext db, ClaimsPrincipal claims,CreateRec
 
     var assigment = await db.PlanAssigments.Where(p=> p.PlanId == currentPlan.Id && p.PassById == userId).FirstOrDefaultAsync();
     if (assigment == null) return Results.NotFound(ApiResponses.Fail("assigment not found",ExceptionCode.NotFound));
-
 
     await db.Records.AddAsync(new Record {
         PlanAssigmentId=assigment.Id,
@@ -473,7 +535,7 @@ app.MapGet("/download-report/{reportId}", async (AppDbContext db, ReportsService
     var report = await db.Reports.FirstOrDefaultAsync(r=> r.Id == reportId);
     if (report == null) return Results.NotFound(ApiResponses.Fail("report not found", ExceptionCode.NotFound));
 
-    var successReport = await reportsServices.CreateDocumentReportUser(reportId,user.Name);
+    var successReport = await reportsServices.CreateDocumentReportUser(reportId,user.GetFullName());
     if (successReport == 0) return Results.Problem();
 
     return Results.File(

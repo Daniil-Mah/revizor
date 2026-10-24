@@ -13,8 +13,7 @@ function RolePage() {
 
     const handleDelete = async (id) => {
       if (!confirm('Удалить роль?')) return;
-      console.log(id)
-  await fetch(`http://localhost:5196/roles/${id}`, { 
+      await fetch(`http://localhost:5196/roles/${id}`, { 
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`

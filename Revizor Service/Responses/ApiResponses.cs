@@ -8,6 +8,7 @@ public class ApiResponses<T> : ApiResponses
     public T? Data {get;set;}
     public Pagination? Pagination {get;set;}
     public static ApiResponses<T> Ok(T data, Pagination? pagination = null) => new() { Success = true, Data = data , Pagination = pagination};
+
 }
 
 public class ApiResponses

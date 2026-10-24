@@ -13,7 +13,7 @@ public class JWT
         var claims  = new []
         {
             new Claim(ClaimTypes.NameIdentifier, us.Id.ToString()),
-            new Claim(ClaimTypes.Name, us.Name),
+            new Claim(ClaimTypes.Name, us.GetFullName()),
             new Claim(ClaimTypes.Role, us.Role!.Name)
         };
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(cfg["JWT:Key"]!));

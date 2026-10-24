@@ -38,10 +38,10 @@
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 20px; /* Отступы между полями */
+  gap: 20px;
 }
 
-/* Группа полей ввода */
+
 .input-group {
   display: flex;
   flex-direction: column;
@@ -76,7 +76,7 @@
   opacity: 0.6;
 }
 
-/* Кнопка */
+
 .login-button {
   margin-top: 10px;
   padding: 14px;
@@ -99,7 +99,7 @@
   transform: scale(0.98);
 }
 
-/* Стили для ошибки */
+
 .login-error {
   color: #ff4d4f;
   font-size: 14px;

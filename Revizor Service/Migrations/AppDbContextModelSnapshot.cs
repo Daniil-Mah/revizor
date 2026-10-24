@@ -72,13 +72,13 @@ namespace Revizor_Service.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<DateTime?>("PeriodEnd")
+                    b.Property<DateOnly?>("PeriodEnd")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("(now()::date + interval '1 months')");
+                        .HasColumnType("date")
+                        .HasDefaultValueSql("(CURRENT_DATE + INTERVAL '1 month')::date");
 
-                    b.Property<DateTime>("PeriodStart")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<DateOnly>("PeriodStart")
+                        .HasColumnType("date");
 
                     b.HasKey("Id");
 
@@ -87,7 +87,7 @@ namespace Revizor_Service.Migrations
                     b.HasIndex("IsArchived")
                         .IsUnique()
                         .HasDatabaseName("idx_only_true")
-                        .HasFilter("\"IsArchived\" = true");
+                        .HasFilter("\"IsArchived\" = false");
 
                     b.HasIndex("Name")
                         .IsUnique();
@@ -117,6 +117,9 @@ namespace Revizor_Service.Migrations
                     b.Property<Guid>("ResponsiblePersonId")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("FacilityId");
@@ -137,36 +140,18 @@ namespace Revizor_Service.Migrations
                         .HasColumnType("uuid")
                         .HasDefaultValueSql("gen_random_uuid()");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("now()");
-
                     b.Property<TimeOnly>("EndAt")
                         .HasColumnType("time without time zone");
-
-                    b.Property<Guid>("FacilityId")
-                        .HasColumnType("uuid");
 
                     b.Property<float?>("PassageWay")
                         .HasColumnType("real");
 
-                    b.Property<Guid>("PlanId")
-                        .HasColumnType("uuid");
-
-                    b.Property<TimeOnly>("StartAt")
-                        .HasColumnType("time without time zone");
-
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid>("PlanAssigmentId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FacilityId");
-
-                    b.HasIndex("PlanId");
-
-                    b.HasIndex("UserId");
+                    b.HasIndex("PlanAssigmentId");
 
                     b.ToTable("Records");
                 });
@@ -237,7 +222,12 @@ namespace Revizor_Service.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasDefaultValueSql("now()");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
@@ -256,12 +246,18 @@ namespace Revizor_Service.Migrations
                     b.Property<int>("RoleId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("SecondName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
                     b.HasIndex("RoleId");
+
+                    b.HasIndex("FirstName", "SecondName", "LastName")
+                        .IsUnique()
+                        .HasDatabaseName("idx_fullname");
 
                     b.ToTable("Users");
                 });
@@ -314,29 +310,13 @@ namespace Revizor_Service.Migrations
 
             modelBuilder.Entity("Revizor_Service.Database.Models.Record", b =>
                 {
-                    b.HasOne("Revizor_Service.Database.Models.Facility", "Facility")
+                    b.HasOne("Revizor_Service.Database.Models.PlanAssigment", "PlanAssigment")
                         .WithMany()
-                        .HasForeignKey("FacilityId")
+                        .HasForeignKey("PlanAssigmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Revizor_Service.Database.Models.Plan", "Plan")
-                        .WithMany()
-                        .HasForeignKey("PlanId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Revizor_Service.Database.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Facility");
-
-                    b.Navigation("Plan");
-
-                    b.Navigation("User");
+                    b.Navigation("PlanAssigment");
                 });
 
             modelBuilder.Entity("Revizor_Service.Database.Models.User", b =>

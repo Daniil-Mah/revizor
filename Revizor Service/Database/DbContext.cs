@@ -28,11 +28,14 @@ public class AppDbContext (DbContextOptions<AppDbContext> options) : DbContext(o
         {
             e.HasKey(u => u.Id);
             e.Property(u => u.Id).HasDefaultValueSql("gen_random_uuid()");
-            e.Property(u => u.Name).HasMaxLength(100).IsRequired();
-            e.HasIndex(u => u.Name).IsUnique();
+            e.Property(u => u.FirstName).HasMaxLength(100).IsRequired();
+            e.Property(u => u.SecondName).HasMaxLength(100).IsRequired();
+            e.Property(u => u.LastName).HasMaxLength(100).IsRequired();
             e.Property(u => u.Password).IsRequired();
             e.Property(u => u.CreatedAt).HasDefaultValueSql("now()");
             e.Property(u => u.RefreshToken).HasMaxLength(50);
+
+            e.HasIndex(u=> new {u.FirstName, u.SecondName, u.LastName}).IsUnique().HasDatabaseName("idx_fullname");
         });
 
         mb.Entity<Facility>(e =>
@@ -51,11 +54,13 @@ public class AppDbContext (DbContextOptions<AppDbContext> options) : DbContext(o
             e.Property(p => p.Name).HasMaxLength(100).IsRequired();
             e.HasIndex(p => p.Name).IsUnique();
             e.Property(p => p.CreatedAt).HasDefaultValueSql("now()");
-            e.Property(p => p.PeriodEnd).HasDefaultValueSql("(now()::date + interval '1 months')");
+            e.Property(p => p.PeriodStart).HasColumnType("date");
+            e.Property(p => p.PeriodEnd).HasDefaultValueSql("(CURRENT_DATE + INTERVAL '1 month')::date");
             e.Property(p => p.IsArchived).HasDefaultValue(false);
 
+
             e.HasIndex(p => p.IsArchived)
-                .HasFilter("\"IsArchived\" = true")
+                .HasFilter("\"IsArchived\" = false")
                 .IsUnique()
                 .HasDatabaseName("idx_only_true");
         });

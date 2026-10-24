@@ -1,35 +1,43 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './LoginPage.css'; // Импортируем стили
+import './LoginPage.css'; 
 
 function LoginPage() {
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [secondName, setSecondName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(''); 
   const navigate = useNavigate();
-  
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); 
+    setError('');
+
     try {
       const res = await fetch('http://localhost:5196/login', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, password }),
+        body: JSON.stringify({ firstName, secondName, lastName, password }),
       });
-  
-      if (!res.ok) throw new Error('Неверный логин или пароль');
-  
-      const data = await res.json();
-      localStorage.setItem('token', data.data.accessToken);
-      
-      const me = await fetch('http://localhost:5196/users/me', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-      const result = await me.json();
 
-      if (result.data.role.name === "admin") {
+      if (!res.ok) throw new Error('Неверный логин или пароль');
+
+      const data = await res.json();
+      const token = data.data.accessToken;
+      localStorage.setItem('token', token);
+      await fetch('http://localhost:5196/users/me', {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+
+      const userInfo = getUserFromCookie();
+      if (!userInfo) throw new Error('Не удалось прочитать данные пользователя');
+
+      if (userInfo.Role.toLowerCase() === 'admin') {
         navigate('/admin');
       } else {
         navigate('/revizor');
@@ -48,9 +56,27 @@ function LoginPage() {
           <div className="input-group">
             <input 
               type="text" 
-              value={name} 
-              onChange={(e) => setName(e.target.value)} 
+              value={secondName} 
+              onChange={(e) => setSecondName(e.target.value)} 
+              placeholder="Введите фамилию"
+              required
+            />
+          </div>
+          <div className="input-group">
+            <input 
+              type="text" 
+              value={firstName} 
+              onChange={(e) => setFirstName(e.target.value)} 
               placeholder="Введите имя"
+              required
+            />
+          </div>
+          <div className="input-group">
+            <input 
+              type="text" 
+              value={lastName} 
+              onChange={(e) => setLastName(e.target.value)} 
+              placeholder="Введите отчество"
               required
             />
           </div>
@@ -69,6 +95,17 @@ function LoginPage() {
       </div>
     </div>
   );
+}
+
+function getUserFromCookie() {
+  const match = document.cookie.split('; ').find(row => row.startsWith('userInfo='));
+  if (!match) return null;
+  const base64 = match.split('=')[1];
+  try {
+    return JSON.parse(atob(base64));
+  } catch {
+    return null;
+  }
 }
 
 export default LoginPage;

@@ -9,7 +9,7 @@ public class Plan
     public Guid CreatedById {get;set;}
     public User CreatedBy {get;set;}
 
-    public DateTime PeriodStart {get;set;}
-    public DateTime? PeriodEnd {get;set;}
+    public DateOnly PeriodStart {get;set;}
+    public DateOnly? PeriodEnd {get;set;}
     public bool IsArchived {get;set;}
 }

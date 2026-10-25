@@ -2,6 +2,9 @@ import { useState } from 'react';
 import RolePage from './RolePage';
 import styles from './AdminPage.module.css';
 import MainContent from './MainContent';
+import UserContent from './UserContent';
+import FacilityContent from './FacilityContent';
+import ReportContent from './ReportsContent';
 
 function AdminPage() {
   const [activeTab, setActiveTab] = useState('main');
@@ -17,6 +20,7 @@ function AdminPage() {
           <button className={activeTab === 'user' ? styles.active : ''} onClick={() => setActiveTab('user')}>Пользователи</button>
           <button className={activeTab === 'facility' ? styles.active : ''} onClick={() => setActiveTab('facility')}>Объекты</button>
           <button className={activeTab === 'plan' ? styles.active : ''} onClick={() => setActiveTab('plan')}>Планы</button>
+          <button className={activeTab === 'report' ? styles.active : ''} onClick={() => setActiveTab('report')}>Отчеты</button>
         </nav>
       </aside>
       
@@ -39,9 +43,10 @@ function AdminPage() {
         <main className={styles.content}>
           {activeTab === 'main' && <MainContent />}
           {activeTab === 'role' && <RolePage />}
-          {activeTab === 'user' && <h1>Пользователи</h1>}
-          {activeTab === 'facility' && <h1>Объекты</h1>}
+          {activeTab === 'user' && <UserContent />}
+          {activeTab === 'facility' && <FacilityContent />}
           {activeTab === 'plan' && <h1>Планы</h1>}
+          {activeTab === 'report' && <ReportContent/>}
         </main>
       </div>
     </div>

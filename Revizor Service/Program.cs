@@ -128,7 +128,19 @@ app.MapPatch("/roles/{roleId}",async (AppDbContext db, int roleId, PatchRole dto
 .RequireAuthorization("admin")
 .WithTags("Role");
 
-app.MapGet("/users", async (AppDbContext db) => Results.Ok(ApiResponses<IEnumerable<User>>.Ok(data: await db.Users.ToArrayAsync())))
+app.MapGet("/users", async (AppDbContext db) => 
+{
+    var users = await db.Users
+    .Include(u=> u.Role)
+    .Select(u=> new UserReponse
+    {
+        Id = u.Id,
+        FullName = u.GetFullName(),
+        Role = u.Role!.Name,
+        CreatedAt = u.CreatedAt
+    }).ToArrayAsync();
+    return Results.Ok(ApiResponses<IEnumerable<UserReponse>>.Ok(data: users));
+})
 .RequireAuthorization("admin")
 .WithTags("User");
 
@@ -398,10 +410,15 @@ app.MapDelete("/plan/{planId}", async (AppDbContext db, Guid planId) =>
 .RequireAuthorization("admin")
 .WithTags("Plan");
 
-app.MapGet("/plan/current", async (AppDbContext db) =>
+app.MapGet("/plan/current", async (AppDbContext db, ClaimsPrincipal claims ) =>
 {
     var currentPlan = await db.Plans.FirstOrDefaultAsync(p=>p.IsArchived==false);
     if (currentPlan == null) return Results.NotFound(ApiResponses.Fail("current plan not found",ExceptionCode.NotFound));
+
+    var success = Guid.TryParse(claims.FindFirstValue(ClaimTypes.NameIdentifier),out Guid userId);
+    if (!success) return Results.Unauthorized();
+
+
     var assigments = await db.PlanAssigments
         .Where(r=> r.PlanId == currentPlan.Id)
         .Include(r=> r.Facility)
@@ -453,7 +470,7 @@ app.MapPost("/plan-assigment/{planId}", async (AppDbContext db,ClaimsPrincipal c
 
     foreach (var assigment in dtos)
     {
-        await db.PlanAssigments.AddAsync(new PlanAssigment{
+        await db.PlanAssigments.AddAsync(new () {
             PlanId = plan.Id,
             PassById = assigment.PassById,
             PassAt = assigment.PassAt,
@@ -522,6 +539,29 @@ app.MapGet("/get-reports/my", async (AppDbContext db, Guid reportId, ClaimsPrinc
     return Results.Ok(ApiResponses<IEnumerable<Report>>.Ok(reports));
 })
 .RequireAuthorization(policy => policy.RequireRole("admin","revizor"))
+.WithTags("Report");
+
+app.MapGet("/get-reports", async (AppDbContext db) =>
+{
+    var results = await db.Plans
+        .Where(p=> p.IsArchived == true)
+        .Select(p=> new FrontReports{
+            PlanId = p.Id,
+            Name = p.Name,
+            PeriodStart = p.PeriodStart,
+            PeriodEnd = (DateOnly)p.PeriodEnd!,
+            }).ToArrayAsync();
+    return Results.Ok(ApiResponses<IEnumerable<FrontReports>>.Ok(results));
+})
+.RequireAuthorization("admin")
+.WithTags("Report");
+
+app.MapGet("/get-reports/{planId}" , async (AppDbContext db, ReportsServices reportsServices, Guid planId) =>
+{ 
+    var result = await  reportsServices.GetRecordsByPlan(planId);
+    return Results.Ok(result);
+})
+.RequireAuthorization("admin")
 .WithTags("Report");
 
 app.MapGet("/download-report/{reportId}", async (AppDbContext db, ReportsServices reportsServices,ClaimsPrincipal claims ,Guid reportId) =>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import styles from './RolePage.module.css';
 
 function MainContent() {
-  const [plan, setPlan] = useState(null);   // ← null, не []
+  const [plan, setPlan] = useState(null);
   const token = localStorage.getItem('token');
 
   useEffect(() => {
@@ -14,7 +14,8 @@ function MainContent() {
       .then(data => setPlan(data.data));
   }, []);
 
-
+  if (!plan) return <h1>Загрузка...</h1>;
+  
   return (
     <div>
       <div className={styles.header}>

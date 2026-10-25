@@ -2,6 +2,7 @@ using Revizor_Service.Database;
 using ClosedXML.Excel;
 using Revizor_Service.Database.Models;
 using Microsoft.EntityFrameworkCore;
+using Revizor_Service.DTO;
 
 namespace Revizor_Service.Services;
 public class ReportsServices
@@ -16,24 +17,45 @@ public class ReportsServices
         _folderReports = cfg["folderReports"]!;
     }
 
-    public async Task<Dictionary<string, List<Record>>> GetRecordsByPlan(Guid planId)
+    public async Task<List<ResultReportForId>> GetRecordsByPlan(Guid planId)
     {
-        var results = new Dictionary<string, List<Record>>();
-        // var plan = await _db.Plans.FirstOrDefaultAsync(p=> p.Id == planId);
-        // if (plan == null) return results;
-        // var records = await _db.Records.Include(r=> r.User).Include(r=> r.Facility).Where(r=> r.PlanId == plan.Id).OrderBy(r=> r.UserId).ToArrayAsync();
-        // foreach (var record in records)
-        // {
-        //     if (results.ContainsKey(record.User.Name))
-        //     {
-        //         results[record.User.Name].Add(record);
-        //     }
-        //     else
-        //     {
-        //         results.Add(record.User.Name, new List<Record>() {record});
-        //     }
-        // }
-        return results;
+        var plan = await _db.Plans.FirstOrDefaultAsync(p=> p.Id == planId);
+        if (plan == null) return [];
+
+        var assignments = await _db.PlanAssigments
+            .Where(a => a.PlanId == planId)
+            .Include(a => a.PassBy)
+            .Include(a => a.Facility)
+            .ToListAsync();
+
+        var records = await _db.Records
+            .Where(r => r.PlanAssigment.PlanId == planId)
+            .ToListAsync();
+
+        var result = assignments
+            .Where(a => records.Any(r => r.PlanAssigmentId == a.Id))
+            .GroupBy(a => a.PassBy)
+            .Select(g => new ResultReportForId
+            {
+                Id = g.Key.Id,
+                FullName = g.Key.GetFullName(),
+                Resords = g.Select(a =>
+                {
+                    var record = records.FirstOrDefault(r => r.PlanAssigmentId == a.Id);
+                    return new ResultRecordForId
+                    {
+                        FacilityTitle = a.Facility.Title,
+                        FacilityLocation = a.Facility.Location,
+                        StartAt = record != null 
+                            ? TimeOnly.FromDateTime(record.PlanAssigment.PassAt) 
+                            : TimeOnly.MinValue,
+                        EndAt = record?.EndAt ?? TimeOnly.MinValue,
+                        PassegeWay = record?.PassageWay ?? 0f
+                    };
+                }).ToList()
+            })
+            .ToList();
+        return result;
     }
     
     // блядская формула для вычисления ночной смены 

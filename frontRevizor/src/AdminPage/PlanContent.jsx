@@ -1,40 +1,44 @@
 import { useEffect, useState } from "react";
 import styles from './RolePage.module.css'
 
-function FacilityContent () {
-    const [facility, setFacility] = useState([])
+function PlanContent () {
+    const [plan, setPlan] = useState([])
     
     useEffect(() => {
-        fetch("http://localhost:5196/facilities",{
+        fetch("http://localhost:5196/plan",{
             headers : {
                 "Authorization" : `Bearer ${localStorage.getItem('token')}`
             }
-        }).then(res=> res.json()).then(data => setFacility(data.data))
+        }).then(res=> res.json()).then(data => setPlan(data.data))
     }, [])
 
     return (
         <div>
             <div className={styles.header}>
-            <h2>Объекты</h2>
+            <h2>Планы</h2>
             <button>+ Добавить</button>
             </div>
     
             <table className={styles.table}>
             <thead>
                 <tr>
-                <th>ID</th>
                 <th>Название</th>
-                <th>Адрес</th>
+                <th>Дата создания</th>
+                <th>Начало</th>
+                <th>Конец</th>
+                <th>Архивный</th>
                 </tr>
             </thead>
             <tbody>
-                {facility.map(f => (
+                {plan.map(p => (
                 <tr
-                    key={f.id}
+                    key={p.id}
                 >
-                    <td>{f.id}</td>
-                    <td>{f.title}</td>
-                    <td>{f.location}</td>
+                    <td>{p.name}</td>
+                    <td>{p.createdAt}</td>
+                    <td>{p.periodStart}</td>
+                    <td>{p.periodEnd}</td>
+                    <td>{p.isArchived === 'true'? 'да' :"нет"}</td>
                 </tr>
                 ))}
             </tbody>
@@ -43,4 +47,4 @@ function FacilityContent () {
     )
 } 
 
-export default FacilityContent;
+export default PlanContent;

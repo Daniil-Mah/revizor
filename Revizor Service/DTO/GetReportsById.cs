@@ -9,6 +9,7 @@ public class ResultReportForId
 
 public class ResultRecordForId
 {
+    public DateTime CreatedAt {get;set;}
     public string  FacilityTitle { get; set; }
     public string  FacilityLocation { get; set; }
     public TimeOnly StartAt { get; set; }

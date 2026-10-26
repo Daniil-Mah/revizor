@@ -63,7 +63,8 @@ builder.Services.AddCors(options =>
         policy.WithOrigins("http://localhost:5173")
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials();
+              .AllowCredentials()
+              .WithExposedHeaders("Content-Disposition");
     });
 });
 var app = builder.Build();
@@ -418,31 +419,46 @@ app.MapGet("/plan/current", async (AppDbContext db, ClaimsPrincipal claims ) =>
     var success = Guid.TryParse(claims.FindFirstValue(ClaimTypes.NameIdentifier),out Guid userId);
     if (!success) return Results.Unauthorized();
 
-
-    var assigments = await db.PlanAssigments
-        .Where(r=> r.PlanId == currentPlan.Id)
-        .Include(r=> r.Facility)
-        .Include(r=> r.PassBy)
-        .Include(r=> r.ResponsiblePerson)
-        .ToListAsync();
-    var results = assigments.GroupBy(a=> a.Facility).Select(g=> new ResultAssigment
+    if (claims.FindFirstValue(ClaimTypes.Role) == "admin")
     {
-        Id = g.Select(p=> p.Id).First(),
-        FacilityId = g.Key.Id,
-        FacilityTitle = g.Key.Title,
-        FacilityLocation = g.Key.Location,
-        PassAt = g.Select(u=> u.PassAt).FirstOrDefault(),
-        Revizors = g.Select(u=> new Revizor {
-            Id = u.PassById,
-            FullName = u.PassBy.GetFullName(),
-            }).ToList(),
-        ResponsiblePerson = g.Select(r => new ResponsiblePerson
+        var assigments = await db.PlanAssigments
+            .Where(r=> r.PlanId == currentPlan.Id)
+            .Include(r=> r.Facility)
+            .Include(r=> r.PassBy)
+            .Include(r=> r.ResponsiblePerson)
+            .ToListAsync();
+        var results = assigments.GroupBy(a=> a.Facility).Select(g=> new ResultAssigmentForAdmin
         {
-            Id = r.ResponsiblePersonId,
-            FullName = r.ResponsiblePerson.GetFullName()
-        }).FirstOrDefault(),
-    }).ToList();
-    return Results.Ok(ApiResponses<DataResultAssigments>.Ok(new () {NamePlan = currentPlan.Name, Assigments=results}));
+            Id = g.Select(p=> p.Id).First(),
+            FacilityId = g.Key.Id,
+            FacilityTitle = g.Key.Title,
+            FacilityLocation = g.Key.Location,
+            PassAt = g.Select(u=> u.PassAt).FirstOrDefault(),
+            Revizors = g.Select(u=> new Revizor {
+                Id = u.PassById,
+                FullName = u.PassBy.GetFullName(),
+                }).ToList(),
+            ResponsiblePerson = g.Select(r => new ResponsiblePerson
+            {
+                Id = r.ResponsiblePersonId,
+                FullName = r.ResponsiblePerson.GetFullName()
+            }).FirstOrDefault(),
+        }).ToList();
+        return Results.Ok(ApiResponses<DataResultAssigments>.Ok(new () {NamePlan = currentPlan.Name, Assigments=results}));
+    }
+    if (claims.FindFirstValue(ClaimTypes.Role) == "revizor")
+    {
+        var assigments = await db.PlanAssigments
+            .Where(r=> r.PlanId == currentPlan.Id)
+            .Where(r=> r.PassById == userId)
+            .Include(r=> r.Facility)
+            .Include(r=> r.PassBy)
+            .Include(r=> r.ResponsiblePerson)
+            .ToListAsync();
+        return Results.Ok(ApiResponses<List<PlanAssigment>>.Ok(assigments));
+    }
+    else {return Results.BadRequest();}
+
 })
 .RequireAuthorization(policy => policy.RequireRole("admin","revizor"))
 .WithTags("Plan");
@@ -455,7 +471,7 @@ app.MapPost("/plan/archived", async (AppDbContext db) =>
     await db.SaveChangesAsync();
     return Results.Ok(ApiResponses.Ok("Plan is arcived"));
 })
-.RequireAuthorization(policy => policy.RequireRole("Admin"))
+.RequireAuthorization(policy => policy.RequireRole("admin"))
 .WithTags("Plan");
 
 app.MapPost("/plan-assigment/{planId}", async (AppDbContext db,ClaimsPrincipal claims, Guid planId, List<CreateAssigment> dtos) =>
@@ -559,31 +575,30 @@ app.MapGet("/get-reports", async (AppDbContext db) =>
 app.MapGet("/get-reports/{planId}" , async (AppDbContext db, ReportsServices reportsServices, Guid planId) =>
 { 
     var result = await  reportsServices.GetRecordsByPlan(planId);
-    return Results.Ok(result);
+    return Results.Ok(ApiResponses<IEnumerable<ResultReportForId>>.Ok(result));
 })
 .RequireAuthorization("admin")
 .WithTags("Report");
 
-app.MapGet("/download-report/{reportId}", async (AppDbContext db, ReportsServices reportsServices,ClaimsPrincipal claims ,Guid reportId) =>
+app.MapGet("/download-report/{planId}", async (AppDbContext db, IConfiguration cfg, ReportsServices reportsServices,ClaimsPrincipal claims ,Guid planId) =>
 {
     var success = Guid.TryParse(claims.FindFirstValue(ClaimTypes.NameIdentifier), out Guid userId);
     if (!success) return Results.Unauthorized();
     
     var user = await db.Users.FirstOrDefaultAsync(u=>u.Id == userId);
     if (user == null) return Results.Unauthorized();
-
-    var report = await db.Reports.FirstOrDefaultAsync(r=> r.Id == reportId);
-    if (report == null) return Results.NotFound(ApiResponses.Fail("report not found", ExceptionCode.NotFound));
-
-    var successReport = await reportsServices.CreateDocumentReportUser(reportId,user.GetFullName());
+    var successReport = await reportsServices.CreateDocumentReportAdmin(planId);
     if (successReport == 0) return Results.Problem();
 
+    var plan = await db.Plans.FirstOrDefaultAsync(p=> p.Id == planId);
+    if (plan==null) return Results.NotFound(ApiResponses.Fail("plan not found",ExceptionCode.NotFound));
     return Results.File(
-        path: report.FilePath,
+        path: $"{cfg["folderReports"]}/Admin/{plan.PeriodStart.Month}_{plan.PeriodStart.Year}.xlsx",
         contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        fileDownloadName: report.FileName
+        fileDownloadName: $"{plan.PeriodStart.Month}_{plan.PeriodStart.Year}.xlsx"
     );
-    
-});
+})
+.RequireAuthorization("admin")
+.WithTags("Report");
 
 app.Run();

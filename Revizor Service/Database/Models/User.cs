@@ -16,4 +16,6 @@ public class User
     public DateTime? RefreshExpireTime { get; set; }
 
     public string GetFullName() => $"{SecondName} {FirstName} {LastName}";
+
+    public string GetFullNameForFileName() => $"{SecondName}_{FirstName}_{LastName}";
 }

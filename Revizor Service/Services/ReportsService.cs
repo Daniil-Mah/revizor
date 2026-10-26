@@ -89,47 +89,45 @@ public class ReportsServices
 
     public async Task<int> CreateDocumentReportAdmin(Guid planId)
     {
-        // using (var workbook = new XLWorkbook())
-        // {
-        //     var currentDate = DateTime.Now;
-        //     var records = await GetRecordsByPlan(planId);
-        //     if (records.Count == 0) return 0 ;
-        //     foreach(var user in records)
-        //     {
-        //         var worksheet = workbook.Worksheets.Add($"{user.Key}");
-        //         worksheet.Cell("A1").Value = currentDate.ToString("dd.MM.yyyy"); 
+        using var workbook = new XLWorkbook();
+        var currentDate = DateTime.Now;
+        var records = await GetRecordsByPlan(planId);
+        if (records.Count == 0) return 0;
+        foreach (var user in records)
+        {
+            var worksheet = workbook.Worksheets.Add($"{user.FullName}");
+            worksheet.Cell("A1").Value = currentDate.ToString("dd.MM.yyyy");
 
-        //         worksheet.Range("A2:G2").Merge();
-        //         worksheet.Cell("A2").Value = user.Key.ToString();
-        //         worksheet.Cell("A3").Value = "Дата";
-        //         worksheet.Cell("B3").Value = "Наименование объекта";
-        //         worksheet.Cell("C3").Value = "Время";
-        //         worksheet.Cell("D3").Value = "Общее";
-        //         worksheet.Cell("E3").Value = "Ночные";
-        //         worksheet.Cell("F3").Value = "Проезд";
+            worksheet.Range("A2:G2").Merge();
+            worksheet.Cell("A2").Value = user.FullName.ToString();
+            worksheet.Cell("A3").Value = "Наименование объекта";
+            worksheet.Cell("B3").Value = "Время";
+            worksheet.Cell("C3").Value = "Общее";
+            worksheet.Cell("D3").Value = "Ночные";
+            worksheet.Cell("E3").Value = "Проезд";
 
-        //         for (var i = 0; i < user.Value.Count; i++)
-        //         {
-        //             worksheet.Cell($"A{i+4}").Value = user.Value[i].CreatedAt.ToString("dd.MM.yyyy HH:mm:ss");
-        //             worksheet.Cell($"B{i+4}").Value = $"{user.Value[i].Facility.Title} {user.Value[i].Facility.Location}";
-        //             worksheet.Cell($"C{i+4}").Value = $"{user.Value[i].StartAt.ToString("HH:mm:ss")} - {user.Value[i].EndAt.ToString("HH:mm:ss")}";
-        //             worksheet.Cell($"D{i+4}").Value = (user.Value[i].EndAt.ToTimeSpan() - user.Value[i].StartAt.ToTimeSpan()).ToString(@"hh\:mm\:ss");
-        //             var startAt = user.Value[i].StartAt;
-        //             var endAt = user.Value[i].EndAt;
+            for (var i = 0; i < user.Resords.Count; i++)
+            {
+                worksheet.Cell($"A{i + 4}").Value = $"{user.Resords[i].FacilityTitle} {user.Resords[i].FacilityLocation}";
+                worksheet.Cell($"B{i + 4}").Value = $"{user.Resords[i].StartAt.ToString("HH:mm:ss")} - {user.Resords[i].EndAt.ToString("HH:mm:ss")}";
+                worksheet.Cell($"C{i + 4}").Value = (user.Resords[i].EndAt.ToTimeSpan() - user.Resords[i].StartAt.ToTimeSpan()).ToString(@"hh\:mm\:ss");
+                var startAt = user.Resords[i].StartAt;
+                var endAt = user.Resords[i].EndAt;
 
-        //             worksheet.Cell($"E{i+4}").Value = GetNightHours(startAt,endAt);
-        //             worksheet.Cell($"F{i+4}").Value = user.Value[i].PassageWay;
-        //             await _db.Reports.AddAsync(new Report {
-        //                 PlanId = planId, 
-        //                 UserId = user.Value[i].UserId,
-        //                 FileName = $"user_{user.Key}",
-        //                 FilePath=$"{_folderReports}/Revizor/"});
-        //         }
-        //         await _db.SaveChangesAsync();
-        //     }
-        //     workbook.SaveAs($"{_folderReports}/Admin/{currentDate.Month}_{currentDate.Year}.xlsx");
-        //     return 1;
-        // }
+                worksheet.Cell($"D{i + 4}").Value = GetNightHours(startAt, endAt);
+                worksheet.Cell($"E{i + 4}").Value = user.Resords[i].PassegeWay;
+                await _db.Reports.AddAsync(new Report
+                {
+                    PlanId = planId,
+                    UserId = user.Id,
+                    FileName = $"user_{user.FullName}",
+                    FilePath = $"{_folderReports}/Revizor/",
+                    CreatedAt = DateTime.UtcNow
+                });
+                await _db.SaveChangesAsync();
+            }
+        }
+        workbook.SaveAs($"{_folderReports}/Admin/{currentDate.Month}_{currentDate.Year}.xlsx");
         return 1;
     }   
 

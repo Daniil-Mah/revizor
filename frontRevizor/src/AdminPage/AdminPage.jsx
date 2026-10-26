@@ -5,6 +5,7 @@ import MainContent from './MainContent';
 import UserContent from './UserContent';
 import FacilityContent from './FacilityContent';
 import ReportContent from './ReportsContent';
+import PlanContent from './PlanContent';
 
 function AdminPage() {
   const [activeTab, setActiveTab] = useState('main');
@@ -45,7 +46,7 @@ function AdminPage() {
           {activeTab === 'role' && <RolePage />}
           {activeTab === 'user' && <UserContent />}
           {activeTab === 'facility' && <FacilityContent />}
-          {activeTab === 'plan' && <h1>Планы</h1>}
+          {activeTab === 'plan' && <PlanContent />}
           {activeTab === 'report' && <ReportContent/>}
         </main>
       </div>

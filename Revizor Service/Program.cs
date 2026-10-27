@@ -1,4 +1,3 @@
-using System;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -13,8 +12,7 @@ using Revizor_Service.Responses;
 using Revizor_Service.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using DocumentFormat.OpenXml.Office2010.ExcelAc;
-using DocumentFormat.OpenXml.Bibliography;
+
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();

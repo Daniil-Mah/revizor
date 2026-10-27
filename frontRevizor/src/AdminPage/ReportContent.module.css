@@ -1,12 +1,78 @@
-.buttonContainer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  max-width: 500px;
+/* Обёртка для кнопки + меню */
+.menuWrapper {
+  position: relative;   /* ← для позиционирования меню */
 }
 
-.button {
-  flex: 0 0 calc((100% - 30px) / 4);
+/* Кнопка */
+.menuButton {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background-color: var(--accent);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-family: var(--sans);
+}
+
+.menuButton:hover {
+  background-color: var(--accent-border);
+}
+
+/* Выпадающее меню */
+.dropdownMenu {
+  position: absolute;
+  top: calc(100% + 8px);   /* ← под кнопкой */
+  right: 0;                 /* ← выравнивание по правому краю */
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 8px;
+  min-width: 200px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Элемент меню */
+.menuItem {
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 4px;
+  color: var(--text-h);
+  font-family: var(--sans);
+  font-size: 14px;
+  transition: background 0.15s ease;
+}
+
+.menuItem:hover {
+  background: var(--code-bg);
+}
+
+/* Пустое состояние */
+.empty {
   padding: 10px;
-  box-sizing: border-box;
+  color: var(--text);
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Выбранный план */
+.selectedInfo {
+  padding: 10px 15px;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  margin-bottom: 15px;
+  color: var(--text-h);
+  font-size: 14px;
 }

@@ -86,6 +86,7 @@ public class AppDbContext (DbContextOptions<AppDbContext> options) : DbContext(o
             e.Property(r => r.FileName).HasMaxLength(200).IsRequired();
             e.Property(r => r.FilePath).HasMaxLength(500).IsRequired();
             e.Property(r => r.CreatedAt).HasDefaultValueSql("now()");
+            e.HasIndex(f => new { f.UserId, f.PlanId }).HasDatabaseName("idx_unique_up");
         });
 }
 }

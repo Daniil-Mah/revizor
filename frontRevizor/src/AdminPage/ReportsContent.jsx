@@ -7,6 +7,16 @@ function ReportContent() {
   const [selectReport, setSelectReport] = useState(null);
   const [reportData, setReportData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [plan, SetPlan] = useState([])
+
+  useEffect(()=> {
+    apiFetch('http://localhost:5196/plan', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    }).then(res=> res.json()).then(data=> SetPlan(data.data))
+  },[])
 
   useEffect(() => {
     apiFetch('http://localhost:5196/get-reports', {
@@ -24,7 +34,7 @@ function ReportContent() {
     }
     
     setLoading(true);
-    fetch(`http://localhost:5196/get-reports/${selectReport.planId}`, {
+    apiFetch(`http://localhost:5196/get-reports/${selectReport.planId}`, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
     })
       .then(res => res.json())
@@ -81,7 +91,14 @@ function ReportContent() {
     <div>
       <h1>Отчеты</h1>
       <div>
-        <button>Сгенерировать отчет</button>
+          <button onClick={()=> setIsMenuOpen(!isMenuOpen)}>Сгенерировать отчет</button>
+        <div>
+          {isMenuOpen && <div>
+                          {<button> {plan.map(p=> p.name)}</button>}
+
+                        </div>}
+        </div>
+        
       </div>
 
       <div className={styles.buttonContainer}>

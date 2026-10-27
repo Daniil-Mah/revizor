@@ -188,6 +188,9 @@ namespace Revizor_Service.Migrations
 
                     b.HasIndex("PlanId");
 
+                    b.HasIndex("UserId", "PlanId")
+                        .HasDatabaseName("idx_unique_up");
+
                     b.ToTable("Reports");
                 });
 

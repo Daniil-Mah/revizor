@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import styles from './RolePage.module.css'
+import { apiFetch } from "../api";
 
 function PlanContent () {
     const [plan, setPlan] = useState([])
     
     useEffect(() => {
-        fetch("http://localhost:5196/plan",{
+        apiFetch("http://localhost:5196/plan",{
             headers : {
                 "Authorization" : `Bearer ${localStorage.getItem('token')}`
             }

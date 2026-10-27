@@ -14,6 +14,7 @@ using Revizor_Service.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using DocumentFormat.OpenXml.Office2010.ExcelAc;
+using DocumentFormat.OpenXml.Bibliography;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
@@ -539,8 +540,10 @@ app.MapPatch("/record/{recordId}", async (AppDbContext db, ClaimsPrincipal claim
 
 app.MapGet("/generate-reports/{planId}", async (AppDbContext db,ReportsServices reportsServices, ClaimsPrincipal claims, Guid planId) =>
 {
-    var role = claims.FindFirstValue(ClaimTypes.Role);
-    var success = await reportsServices.CreateDocumentReportAdmin(planId);
+    var succes = Guid.TryParse(claims.FindFirstValue(ClaimTypes.NameIdentifier), out Guid userId);
+    var user = await db.Users.FirstOrDefaultAsync(u=> u.Id==userId);
+    if (user == null) return Results.Unauthorized();
+    var success = await reportsServices.CreateDocumentReportAdmin(planId, user );
     if (success == 0) return Results.BadRequest();
     return Results.Ok(ApiResponses.Ok("Success generate"));
 })
@@ -559,13 +562,13 @@ app.MapGet("/get-reports/my", async (AppDbContext db, Guid reportId, ClaimsPrinc
 
 app.MapGet("/get-reports", async (AppDbContext db) =>
 {
-    var results = await db.Plans
-        .Where(p=> p.IsArchived == true)
-        .Select(p=> new FrontReports{
+    var results = await db.Reports
+        .Include(p=> p.Plan)
+        .Select(p=> new FrontReports {
             PlanId = p.Id,
-            Name = p.Name,
-            PeriodStart = p.PeriodStart,
-            PeriodEnd = (DateOnly)p.PeriodEnd!,
+            Name = p.Plan.Name,
+            PeriodStart = p.Plan.PeriodStart,
+            PeriodEnd = (DateOnly)p.Plan.PeriodEnd!,
             }).ToArrayAsync();
     return Results.Ok(ApiResponses<IEnumerable<FrontReports>>.Ok(results));
 })
@@ -580,22 +583,28 @@ app.MapGet("/get-reports/{planId}" , async (AppDbContext db, ReportsServices rep
 .RequireAuthorization("admin")
 .WithTags("Report");
 
-app.MapGet("/download-report/{planId}", async (AppDbContext db, IConfiguration cfg, ReportsServices reportsServices,ClaimsPrincipal claims ,Guid planId) =>
+app.MapGet("/download-report/{reportId}", async (AppDbContext db, IConfiguration cfg, ReportsServices reportsServices,ClaimsPrincipal claims ,Guid reportId) =>
 {
     var success = Guid.TryParse(claims.FindFirstValue(ClaimTypes.NameIdentifier), out Guid userId);
     if (!success) return Results.Unauthorized();
     
     var user = await db.Users.FirstOrDefaultAsync(u=>u.Id == userId);
     if (user == null) return Results.Unauthorized();
-    var successReport = await reportsServices.CreateDocumentReportAdmin(planId);
-    if (successReport == 0) return Results.Problem();
 
-    var plan = await db.Plans.FirstOrDefaultAsync(p=> p.Id == planId);
-    if (plan==null) return Results.NotFound(ApiResponses.Fail("plan not found",ExceptionCode.NotFound));
+    var report = await db.Reports
+                        .Include(r=> r.Plan)
+                        .FirstOrDefaultAsync(p=> p.Id == reportId);
+    if (report==null) return Results.NotFound(
+                                ApiResponses.Fail(
+                                """
+                                report not found, try to generate report use next link '/generate-reports/planId' . where planId - your necessary plan 
+                                """,
+                                ExceptionCode.NotFound));
+
     return Results.File(
-        path: $"{cfg["folderReports"]}/Admin/{plan.PeriodStart.Month}_{plan.PeriodStart.Year}.xlsx",
+        path: $"{cfg["folderReports"]}/Admin/{report.Plan.PeriodStart.Month}_{report.Plan.PeriodStart.Year}.xlsx",
         contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        fileDownloadName: $"{plan.PeriodStart.Month}_{plan.PeriodStart.Year}.xlsx"
+        fileDownloadName: $"{report.Plan.PeriodStart.Month}_{report.Plan.PeriodStart.Year}.xlsx"
     );
 })
 .RequireAuthorization("admin")

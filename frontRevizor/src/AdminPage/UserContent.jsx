@@ -1,55 +1,19 @@
 import {useEffect, useState } from "react";
 import styles from './RolePage.module.css'
-import { useNavigate } from "react-router-dom";
+import { apiFetch } from "../api";
 
 
 function UserContent() {
     const [user, setUser] = useState([])
     const [loading, setLoading] = useState(true);
-    const navigate = useNavigate();
 
    useEffect(() => {
-    loadUsers();
-  }, []);
-
-  async function loadUsers() {
-    try {
-      let token = localStorage.getItem('token');
-      
-      let res = await fetch('http://localhost:5196/users', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (res.status === 401) {
-        const refreshRes = await fetch('http://localhost:5196/refresh', {
-          method: 'POST',
-          credentials: 'include'
-        });
-        
-        if (!refreshRes.ok) {
-          navigate('login')
-          return;
-        }
-        
-        const refreshData = await refreshRes.json();
-        token = refreshData.data.accessToken;
-        localStorage.setItem('token', token);
-        
-        res = await fetch('http://localhost:5196/users', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+    apiFetch("http://localhost:5196/users", {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
-      
-      if (!res.ok) throw new Error('Ошибка загрузки');
-      
-      const data = await res.json();
-      setUser(data.data || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }
+    }).then(res=> res.json()).then(data=> setUser(data.data),setLoading(false));
+  }, []);
 
     if (loading) return <h1>Загрузка...</h1>;
 

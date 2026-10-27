@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import styles from './RolePage.module.css'
+import { apiFetch } from '../api';
 
 function RolePage() {
   const [roles, setRoles] = useState([]);
   const [selectedRole, setSelectedRole] = useState(null);
 
   useEffect(() => {
-    fetch('/roles')
+    apiFetch('/roles')
       .then(res => res.json())
       .then(data => setRoles(data.data));
   }, []);

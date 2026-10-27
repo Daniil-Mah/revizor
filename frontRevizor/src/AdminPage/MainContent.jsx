@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import styles from './RolePage.module.css';
+import { apiFetch } from '../api';
 
 function MainContent() {
   const [plan, setPlan] = useState(null);
   const token = localStorage.getItem('token');
 
   useEffect(() => {
-    fetch('http://localhost:5196/plan/current', {
+    apiFetch('http://localhost:5196/plan/current', {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` }
     })

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import styles from './ReportContent.module.css';
+import { apiFetch } from '../api';
 
 function ReportContent() {
   const [report, setReport] = useState([]);
@@ -8,7 +9,7 @@ function ReportContent() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:5196/get-reports', {
+    apiFetch('http://localhost:5196/get-reports', {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
     })
       .then(res => res.json())

@@ -87,7 +87,7 @@ public class ReportsServices
         return total;
     }
 
-    public async Task<int> CreateDocumentReportAdmin(Guid planId)
+    public async Task<int> CreateDocumentReportAdmin(Guid planId, User admin)
     {
         using var workbook = new XLWorkbook();
         var currentDate = DateTime.Now;
@@ -116,17 +116,17 @@ public class ReportsServices
 
                 worksheet.Cell($"D{i + 4}").Value = GetNightHours(startAt, endAt);
                 worksheet.Cell($"E{i + 4}").Value = user.Resords[i].PassegeWay;
-                await _db.Reports.AddAsync(new Report
-                {
-                    PlanId = planId,
-                    UserId = user.Id,
-                    FileName = $"user_{user.FullName}",
-                    FilePath = $"{_folderReports}/Revizor/",
-                    CreatedAt = DateTime.UtcNow
-                });
-                await _db.SaveChangesAsync();
             }
         }
+        await _db.Reports.AddAsync(new Report
+        {
+            PlanId = planId,
+            UserId = admin.Id,
+            FileName = $"user_{admin.GetFullName()}",
+            FilePath = $"{_folderReports}/Revizor/",
+            CreatedAt = DateTime.UtcNow
+        });
+        await _db.SaveChangesAsync();
         workbook.SaveAs($"{_folderReports}/Admin/{currentDate.Month}_{currentDate.Year}.xlsx");
         return 1;
     }   

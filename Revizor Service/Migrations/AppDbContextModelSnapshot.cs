@@ -186,6 +186,8 @@ namespace Revizor_Service.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("PlanId");
+
                     b.ToTable("Reports");
                 });
 
@@ -317,6 +319,17 @@ namespace Revizor_Service.Migrations
                         .IsRequired();
 
                     b.Navigation("PlanAssigment");
+                });
+
+            modelBuilder.Entity("Revizor_Service.Database.Models.Report", b =>
+                {
+                    b.HasOne("Revizor_Service.Database.Models.Plan", "Plan")
+                        .WithMany()
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Plan");
                 });
 
             modelBuilder.Entity("Revizor_Service.Database.Models.User", b =>

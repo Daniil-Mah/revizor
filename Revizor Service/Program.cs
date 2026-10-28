@@ -473,6 +473,33 @@ app.MapPost("/plan/archived", async (AppDbContext db) =>
 .RequireAuthorization(policy => policy.RequireRole("admin"))
 .WithTags("Plan");
 
+app.MapGet("/plan-assigment/{planId}" , async (AppDbContext db, Guid planId) =>
+{
+    var assigments = await db.PlanAssigments
+        .Where(p=> p.PlanId == planId)
+        .Include(p=> p.PassBy)
+        .Include(p=> p.ResponsiblePerson)
+        .Include(p=> p.Facility)
+        .ToArrayAsync();
+    var result = assigments.GroupBy(p=> p.Facility)
+        .Select(r=> new ResultPlanAssigment
+        {
+            Facility = $"{r.Key.Title} {r.Key.Location}",
+            PassAt = r.Select(p=> p.PassAt).First(),
+            Revizors = r.Select(r=> new Revizor
+            {
+                Id = r.PassById,
+                FullName = r.PassBy.GetFullName()
+            }).ToArray(),
+            ResponsiblePerson = r.Select(p=> new Revizor
+            {
+                Id = p.ResponsiblePersonId,
+                FullName = p.ResponsiblePerson.GetFullName()
+            }).First()
+        }).ToArray();
+    return Results.Ok(ApiResponses<IEnumerable<ResultPlanAssigment>>.Ok(result)) ;
+});
+
 app.MapPost("/plan-assigment/{planId}", async (AppDbContext db,ClaimsPrincipal claims, Guid planId, List<CreateAssigment> dtos) =>
 {
     var success = Guid.TryParse(claims.FindFirstValue(ClaimTypes.NameIdentifier), out Guid userId);

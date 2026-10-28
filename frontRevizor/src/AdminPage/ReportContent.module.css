@@ -1,11 +1,26 @@
+/* Шапка: заголовок слева, кнопка справа */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 28px;
+  font-family: var(--heading);
+  color: var(--text-h);
+}
+
 /* Обёртка для кнопки + меню */
 .menuWrapper {
-  position: relative;   /* ← для позиционирования меню */
+  position: relative;
 }
 
 /* Кнопка */
 .menuButton {
-  padding: 10px 20px;
+  padding: 12px 24px;
   border-radius: 8px;
   border: none;
   background-color: var(--accent);
@@ -24,8 +39,8 @@
 /* Выпадающее меню */
 .dropdownMenu {
   position: absolute;
-  top: calc(100% + 8px);   /* ← под кнопкой */
-  right: 0;                 /* ← выравнивание по правому краю */
+  top: calc(100% + 8px);
+  right: 0;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -66,13 +81,27 @@
   text-align: center;
 }
 
-/* Выбранный план */
-.selectedInfo {
-  padding: 10px 15px;
-  background: var(--accent-bg);
-  border: 1px solid var(--accent-border);
+/* Контейнер для кнопок отчётов */
+.buttonContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Кнопка отчёта */
+.button {
+  padding: 12px 20px;
   border-radius: 8px;
-  margin-bottom: 15px;
+  border: 1px solid var(--border);
+  background: var(--code-bg);
   color: var(--text-h);
   font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--sans);
+}
+
+.button:hover {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
 }

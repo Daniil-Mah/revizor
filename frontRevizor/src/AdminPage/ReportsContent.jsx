@@ -5,60 +5,30 @@ import { apiFetch } from '../api';
 function ReportContent() {
   const [report, setReport] = useState([]);
   const [selectReport, setSelectReport] = useState(null);
-  const [reportData, setReportData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [plan, SetPlan] = useState([])
-
-  useEffect(()=> {
-    apiFetch('http://localhost:5196/plan', {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
-    }).then(res=> res.json()).then(data=> SetPlan(data.data))
-  },[])
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [plan, setPlan] = useState([]);
 
   useEffect(() => {
-    apiFetch('http://localhost:5196/get-reports', {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-    })
+    apiFetch('http://localhost:5196/plan')
+      .then(res => res.json())
+      .then(data => setPlan(data.data || []));
+  }, []);
+
+  useEffect(() => {
+    apiFetch('http://localhost:5196/get-reports')
       .then(res => res.json())
       .then(data => setReport(data.data || []))
       .catch(err => console.error(err));
   }, []);
 
-  useEffect(() => {
-    if (!selectReport) {
-      setReportData(null);
-      return;
-    }
-    
-    setLoading(true);
-    apiFetch(`http://localhost:5196/get-reports/${selectReport.planId}`, {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-    })
-      .then(res => res.json())
-      .then(data => {
-        setReportData(data.data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error(err);
-        setLoading(false);
-      });
-  }, [selectReport]);
 
   async function downloadReport(planId) {
-    const token = localStorage.getItem('token');
-    
-    const res = await fetch(`http://localhost:5196/download-report/${planId}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const res = await apiFetch(`http://localhost:5196/download-report/${planId}`);
     
     if (!res.ok) throw new Error('Ошибка скачивания');
     
-  const contentDisposition = res.headers.get('Content-Disposition');
-  let fileName = `report_${planId}.xlsx`;
+    const contentDisposition = res.headers.get('Content-Disposition');
+    let fileName = `report_${planId}.xlsx`;
     if (contentDisposition) {
       const match = contentDisposition.match(/filename="?([^";]+)"?/);
       if (match) fileName = match[1];
@@ -77,28 +47,56 @@ function ReportContent() {
     window.URL.revokeObjectURL(url);
   }
 
-  if (selectReport) {
-    return (
-      <div>
-        <button onClick={() => setSelectReport(null)}>← Назад к списку</button>
-        {loading ? ( <h1>Загрузка...</h1> ) : reportData ? 
-        (  
-        <pre>{JSON.stringify(reportData, null, 2)}</pre> ) : ( <h1>Нет данных</h1>)}
-      </div>
-    );
+  async function generateReport(planId) {
+    try {
+      const res = await apiFetch(`http://localhost:5196/generate-reports/${planId}`, {
+        method: 'GET'
+      });
+      
+      if (!res.ok) throw new Error('Ошибка генерации');
+      
+      const reportsRes = await apiFetch('http://localhost:5196/get-reports');
+      const data = await reportsRes.json();
+      setReport(data.data || []);
+      
+      setIsMenuOpen(false);
+    } catch (err) {
+      console.error(err);
+    }
   }
+
+
   return (
     <div>
-      <h1>Отчеты</h1>
-      <div>
-          <button onClick={()=> setIsMenuOpen(!isMenuOpen)}>Сгенерировать отчет</button>
-        <div>
-          {isMenuOpen && <div>
-                          {<button> {plan.map(p=> p.name)}</button>}
-
-                        </div>}
-        </div>
+      <div className={styles.header}>
+        <h1>Отчеты</h1>
         
+        <div className={styles.menuWrapper}>
+          <button 
+            className={styles.menuButton}
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            Сгенерировать отчет
+          </button>
+          
+          {isMenuOpen && (
+            <div className={styles.dropdownMenu}>
+              {plan.length === 0 ? (
+                <p className={styles.empty}>Нет планов</p>
+              ) : (
+                plan.map(p => (
+                  <button
+                    key={p.id}
+                    className={styles.menuItem}
+                    onClick={() => generateReport(p.id)}
+                  >
+                    {p.name}
+                  </button>
+                ))
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className={styles.buttonContainer}>

@@ -114,7 +114,7 @@ namespace Revizor_Service.Migrations
                     b.Property<Guid>("PlanId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ResponsiblePersonId")
+                    b.Property<Guid?>("ResponsiblePersonId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("Status")
@@ -232,6 +232,9 @@ namespace Revizor_Service.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -283,26 +286,25 @@ namespace Revizor_Service.Migrations
                     b.HasOne("Revizor_Service.Database.Models.Facility", "Facility")
                         .WithMany()
                         .HasForeignKey("FacilityId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Revizor_Service.Database.Models.User", "PassBy")
                         .WithMany()
                         .HasForeignKey("PassById")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Revizor_Service.Database.Models.Plan", "Plan")
                         .WithMany()
                         .HasForeignKey("PlanId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Revizor_Service.Database.Models.User", "ResponsiblePerson")
                         .WithMany()
                         .HasForeignKey("ResponsiblePersonId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Facility");
 
@@ -318,7 +320,7 @@ namespace Revizor_Service.Migrations
                     b.HasOne("Revizor_Service.Database.Models.PlanAssigment", "PlanAssigment")
                         .WithMany()
                         .HasForeignKey("PlanAssigmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("PlanAssigment");
@@ -329,10 +331,18 @@ namespace Revizor_Service.Migrations
                     b.HasOne("Revizor_Service.Database.Models.Plan", "Plan")
                         .WithMany()
                         .HasForeignKey("PlanId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Revizor_Service.Database.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Plan");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Revizor_Service.Database.Models.User", b =>
@@ -340,7 +350,7 @@ namespace Revizor_Service.Migrations
                     b.HasOne("Revizor_Service.Database.Models.Role", "Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Role");

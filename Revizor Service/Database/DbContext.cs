@@ -5,7 +5,6 @@ namespace Revizor_Service.Database;
 
 public class AppDbContext (DbContextOptions<AppDbContext> options) : DbContext(options)
 {
-
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Facility> Facilities => Set<Facility>();
@@ -34,8 +33,9 @@ public class AppDbContext (DbContextOptions<AppDbContext> options) : DbContext(o
             e.Property(u => u.Password).IsRequired();
             e.Property(u => u.CreatedAt).HasDefaultValueSql("now()");
             e.Property(u => u.RefreshToken).HasMaxLength(50);
-
             e.HasIndex(u=> new {u.FirstName, u.SecondName, u.LastName}).IsUnique().HasDatabaseName("idx_fullname");
+
+            e.HasOne(u=> u.Role).WithMany().HasForeignKey(u=>u.RoleId).OnDelete(DeleteBehavior.Restrict);
         });
 
         mb.Entity<Facility>(e =>
@@ -58,7 +58,6 @@ public class AppDbContext (DbContextOptions<AppDbContext> options) : DbContext(o
             e.Property(p => p.PeriodEnd).HasDefaultValueSql("(CURRENT_DATE + INTERVAL '1 month')::date");
             e.Property(p => p.IsArchived).HasDefaultValue(false);
 
-
             e.HasIndex(p => p.IsArchived)
                 .HasFilter("\"IsArchived\" = false")
                 .IsUnique()
@@ -69,12 +68,21 @@ public class AppDbContext (DbContextOptions<AppDbContext> options) : DbContext(o
         {
             e.HasKey(r => r.Id);
             e.Property(r => r.Id).HasDefaultValueSql("gen_random_uuid()");
+
+            e.HasOne(r => r.PlanAssigment)
+                .WithMany()
+                .HasForeignKey(r => r.PlanAssigmentId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         mb.Entity<PlanAssigment>(e =>
         {
             e.HasKey(pa => pa.Id);
             e.Property(pa => pa.Id).HasDefaultValueSql("gen_random_uuid()");
+            e.HasOne(u=> u.Plan).WithMany().HasForeignKey(u=>u.PlanId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(u=> u.Facility).WithMany().HasForeignKey(u=> u.FacilityId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(u=> u.PassBy).WithMany().HasForeignKey(u=> u.PassById).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(u=> u.ResponsiblePerson).WithMany().HasForeignKey(u=> u.ResponsiblePersonId).OnDelete(DeleteBehavior.SetNull);
         });
 
         mb.Entity<Report>(e =>  
@@ -87,6 +95,15 @@ public class AppDbContext (DbContextOptions<AppDbContext> options) : DbContext(o
             e.Property(r => r.FilePath).HasMaxLength(500).IsRequired();
             e.Property(r => r.CreatedAt).HasDefaultValueSql("now()");
             e.HasIndex(f => new { f.UserId, f.PlanId }).HasDatabaseName("idx_unique_up");
+            e.HasOne(r => r.Plan)
+                .WithMany()
+                .HasForeignKey(r => r.PlanId)
+                .OnDelete(DeleteBehavior.Restrict);
+                
+            e.HasOne(r => r.User)
+                .WithMany()
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 }
 }

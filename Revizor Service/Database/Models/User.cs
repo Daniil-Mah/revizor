@@ -14,6 +14,7 @@ public class User
     public DateTime CreatedAt {get;set;}
     public string? RefreshToken {get;set;}
     public DateTime? RefreshExpireTime { get; set; }
+    public bool IsActive {get;set;} = true;
 
     public string GetFullName() => $"{SecondName} {FirstName} {LastName}";
 

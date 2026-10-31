@@ -4,6 +4,7 @@ public class Report
 {
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
+    public User User { get; set; }
     public Guid PlanId { get; set; }
     public Plan? Plan {get;set;}
     public string FileName { get; set; }

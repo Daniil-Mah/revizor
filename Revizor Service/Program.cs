@@ -132,14 +132,14 @@ app.MapGet("/users", async (AppDbContext db) =>
 {
     var users = await db.Users
     .Include(u=> u.Role)
-    .Select(u=> new UserReponse
+    .Select(u=> new UserResponse
     {
         Id = u.Id,
         FullName = u.GetFullName(),
         Role = u.Role!.Name,
         CreatedAt = u.CreatedAt
     }).ToArrayAsync();
-    return Results.Ok(ApiResponses<IEnumerable<UserReponse>>.Ok(data: users));
+    return Results.Ok(ApiResponses<IEnumerable<UserResponse>>.Ok(data: users));
 })
 .RequireAuthorization("admin")
 .WithTags("User");
@@ -158,7 +158,7 @@ app.MapDelete("/users/{userId}", async (AppDbContext db, Guid userId) =>
 {
     var user = await db.Users.FirstOrDefaultAsync(u=> u.Id == userId);
     if (user==null) {return Results.NotFound(ApiResponses.Fail("User not found", ExceptionCode.DoesNotExists));}
-    db.Users.Remove(user);
+    user.IsActive = false;
     await db.SaveChangesAsync();
     return Results.Ok(ApiResponses.Ok("User is delete"));
 })
@@ -167,8 +167,16 @@ app.MapDelete("/users/{userId}", async (AppDbContext db, Guid userId) =>
 
 app.MapGet("/users/{userId}", async (AppDbContext db, Guid userId) =>
 {
-    var user = await db.Users.FirstOrDefaultAsync(u=> u.Id == userId);
-    return user != null ? Results.Ok(ApiResponses<User>.Ok(data: user)) : Results.NotFound(ApiResponses.Fail("User does not exists", ExceptionCode.DoesNotExists));
+    var user = await db.Users
+        .Include(u=> u.Role)
+        .FirstOrDefaultAsync(u=> u.Id == userId);
+    return user != null ? Results.Ok(ApiResponses<UserResponse>.Ok(new ()
+    {
+        Id = user.Id,
+        FullName = user.GetFullName(),
+        Role = user.Role!.Name,
+        CreatedAt = user.CreatedAt
+    })) : Results.NotFound(ApiResponses.Fail("User does not exists", ExceptionCode.DoesNotExists));
 })
 .RequireAuthorization("admin")
 .WithTags("User");
@@ -439,7 +447,7 @@ app.MapGet("/plan/current", async (AppDbContext db, ClaimsPrincipal claims ) =>
                 }).ToList(),
             ResponsiblePerson = g.Select(r => new ResponsiblePerson
             {
-                Id = r.ResponsiblePersonId,
+                Id = (Guid)r.ResponsiblePersonId,
                 FullName = r.ResponsiblePerson.GetFullName()
             }).FirstOrDefault(),
         }).ToList();
@@ -493,7 +501,7 @@ app.MapGet("/plan-assigment/{planId}" , async (AppDbContext db, Guid planId) =>
             }).ToArray(),
             ResponsiblePerson = r.Select(p=> new Revizor
             {
-                Id = p.ResponsiblePersonId,
+                Id = (Guid)p.ResponsiblePersonId,
                 FullName = p.ResponsiblePerson.GetFullName()
             }).First()
         }).ToArray();
@@ -628,7 +636,7 @@ app.MapGet("/download-report/{reportId}", async (AppDbContext db, IConfiguration
 
     return Results.File(
         path: $"{cfg["folderReports"]}/Admin/{report.Plan.PeriodStart.Month}_{report.Plan.PeriodStart.Year}.xlsx",
-        contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        contentType: "application/vnd.openxmlformats-officed    ocument.spreadsheetml.sheet",
         fileDownloadName: $"{report.Plan.PeriodStart.Month}_{report.Plan.PeriodStart.Year}.xlsx"
     );
 })

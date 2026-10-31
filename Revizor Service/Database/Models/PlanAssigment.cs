@@ -12,7 +12,7 @@ public class PlanAssigment
     public DateTime PassAt {get;set;}
     public Guid PassById {get;set;}
     public User? PassBy {get;set;}
-    public Guid ResponsiblePersonId {get;set;}
+    public Guid? ResponsiblePersonId {get;set;} = null;
     public User? ResponsiblePerson {get;set;}
     public StatusPlanAssigment Status {get;set;}
 }

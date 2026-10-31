@@ -2,7 +2,7 @@ using System;
 
 namespace Revizor_Service.Responses;
 
-public class UserReponse
+public class UserResponse
 {
     public Guid Id {get;set;}
     public string FullName { get; set; }

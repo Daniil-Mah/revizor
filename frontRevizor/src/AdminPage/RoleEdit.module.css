@@ -1,0 +1,58 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: var(--bg);
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  min-width: 320px;
+  border: 1px solid var(--border);
+}
+
+.modal h3 {
+  margin-top: 0;
+  color: var(--text-h);
+  font-family: var(--heading);
+}
+
+.modal input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0 20px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--code-bg);
+  color: var(--text-h);
+  font-family: var(--sans);
+  box-sizing: border-box;
+}
+
+.buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.buttons button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-h);
+  font-family: var(--sans);
+}
+
+.buttons button[type="submit"] {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+}

@@ -351,7 +351,7 @@ app.MapPatch("/facilities/{facilityId}",async (AppDbContext db, Guid facilityId,
 
     if (dto.Title != null) facility.Title = dto.Title;
     if (dto.Location != null) facility.Location = dto.Location;
-
+    await db.SaveChangesAsync();
     return Results.NoContent();
 })
 .RequireAuthorization("admin")

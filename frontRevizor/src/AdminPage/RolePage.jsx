@@ -24,7 +24,7 @@ function RolePage() {
   };
 
     const handleDelete = async (id) => {
-      if (!confirm('Удалить роль?')) return;
+      if (!confirm('Удалить роль?')) { setSelectedRole(null); return;}
       const res = apiFetch(`http://localhost:5196/roles/${id}`, { 
       method: 'DELETE'
     });

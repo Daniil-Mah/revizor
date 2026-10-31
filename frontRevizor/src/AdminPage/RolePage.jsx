@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
 import styles from './RolePage.module.css'
 import { apiFetch } from '../api';
+import EditRoleModal from './RoleEdit';
+import RoleAddModal from './RoleAdd';
 
 function RolePage() {
   const [roles, setRoles] = useState([]);
   const [selectedRole, setSelectedRole] = useState(null);
+  const [editingRole, setEditingRole] = useState(null);
+  const [IsAdd, setIsAdd] = useState(false)
 
   useEffect(() => {
     apiFetch('/roles')
@@ -12,33 +16,42 @@ function RolePage() {
       .then(data => setRoles(data.data));
   }, []);
 
+  const handleAddSave = async () => {
+    const res = await apiFetch('http://localhost:5196/roles');
+    const data = await res.json();
+    setRoles(data.data);
+    setIsAdd(false);
+  };
+
     const handleDelete = async (id) => {
       if (!confirm('Удалить роль?')) return;
-      await fetch(`http://localhost:5196/roles/${id}`, { 
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
+      const res = apiFetch(`http://localhost:5196/roles/${id}`, { 
+      method: 'DELETE'
     });
+    if ((await res).status !== 200 ) {
+      alert ("Нельзя удалить запись")
+      return;
+    }
     setRoles(roles.filter(r => r.id !== id));
     setSelectedRole(null);
   };
 
-  const handleEdit = (role) => {
-    console.log('Изменить:', role);
+  const handleSave = (updatedRole) => {
+    setRoles(roles.map(r => r.id === updatedRole.id ? updatedRole : r));
+    setSelectedRole(null);
   };
 
   return (
     <div>
       <div className={styles.header}>
         <h2>Роли</h2>
-        <button>+ Добавить</button>
+        <button onClick={() => setIsAdd(true)}>+ Добавить</button>
       </div>
 
       {selectedRole && (
         <div className={styles.actions}>
           <span>Выбрано: {selectedRole.name}</span>
-          <button onClick={() => handleEdit(selectedRole)}>Изменить</button>
+          <button onClick={() => setEditingRole(selectedRole)}>Изменить</button>
           <button onClick={() => handleDelete(selectedRole.id)}>Удалить</button>
           <button onClick={() => setSelectedRole(null)}>Отмена</button>
         </div>
@@ -64,6 +77,19 @@ function RolePage() {
           ))}
         </tbody>
       </table>
+      {editingRole && (
+        <EditRoleModal
+          role={editingRole}
+          onClose={() => setEditingRole(null)}
+          onSave={handleSave}
+        />
+      )}
+      {IsAdd && (
+      <RoleAddModal
+        onClose={() => setIsAdd(false)}
+        onSave={handleAddSave}
+      />
+    )}
     </div>
   );
 }

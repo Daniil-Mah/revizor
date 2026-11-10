@@ -1,0 +1,123 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.navButton {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: clamp(16px, 1.1vw, 20px);
+  line-height: 1.5;
+  font-weight: 600;
+  font-family: var(--sans);
+  cursor: pointer;
+}
+.navButton:hover { background: var(--accent-bg); }
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 16px 64px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 1100px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 14px;
+  padding: 22px;
+  min-height: 130px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-top: 6px solid var(--accent);
+  border-radius: 14px;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--sans);
+  box-shadow: var(--shadow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  animation: slideRight 0.4s ease both;
+}
+
+.card:hover:not(:disabled),
+.card:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--accent-border);
+  outline: none;
+}
+
+.card:disabled { opacity: 0.6; cursor: progress; }
+
+@keyframes slideRight {
+  from { opacity: 0; transform: translateX(-24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.cardTitle {
+  color: var(--text-h);
+  font-size: clamp(18px, 1.2vw, 24px);
+  line-height: 1.5;
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.cardStatus {
+  color: var(--accent);
+  font-size: clamp(12px, 0.9vw, 14px);
+  line-height: 1.5;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.message,
+.error {
+  font-size: clamp(16px, 1.25vw, 22px);
+  line-height: 1.5;
+  padding: 24px 32px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.message {
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.error {
+  color: var(--text-h);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+}

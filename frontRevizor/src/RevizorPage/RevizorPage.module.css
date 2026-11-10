@@ -1,0 +1,135 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.navButton {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: clamp(16px, 1.1vw, 20px);
+  line-height: 1.5;
+  font-weight: 600;
+  font-family: var(--sans);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.navButton:hover { background: var(--accent-bg); }
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 16px 64px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 760px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 22px 26px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-left: 6px solid var(--accent);
+  border-radius: 14px;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--sans);
+  box-shadow: var(--shadow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  animation: slideDown 0.4s ease both;
+}
+
+.card:hover,
+.card:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--accent-border);
+  outline: none;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.cardRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cardLabel {
+  color: var(--text);
+  font-size: clamp(16px, 1vw, 20px);
+  line-height: 1.5;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cardValue {
+  color: var(--text-h);
+  font-size: clamp(18px, 1.2vw, 24px);
+  line-height: 1.5;
+  font-weight: 700;
+  text-align: right;
+  max-width: 70%;
+  word-break: break-word;
+}
+
+.message,
+.error {
+  font-size: clamp(16px, 1.2vw, 22px);
+  line-height: 1.5;
+  padding: 24px 32px;
+  border-radius: 12px;
+  text-align: center;
+  font-family: var(--sans);
+}
+
+.message {
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.error {
+  color: var(--text-h);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+}
+
+@media (max-width: 640px) {
+  .cardValue { max-width: 100%; text-align: left; }
+  .cardRow { flex-direction: column; gap: 4px; }
+}
